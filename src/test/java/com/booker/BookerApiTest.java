@@ -12,35 +12,40 @@ public class BookerApiTest {
     private static String token;
 
     @BeforeAll
-    public static void setup() {
+    static void setup() {
         token = AuthHelper.gerarToken();
-        assertThat(token, notNullValue());
+        assertThat("Token deve ser gerado", token, notNullValue());
         System.out.println("Token gerado: " + token);
     }
 
     @Test
-    public void testCriarBooking() {
-        int bookingId = BookingHelper.criarBooking("Cliente", "Teste");
-        assertThat(bookingId, greaterThan(0));
-        System.out.println("Booking criado: " + bookingId);
+    void testCriarBooking() {
+        int bookingId = BookingHelper.criarBooking("Joao", "Souza");
+        assertThat("BookingId deve ser gerado", bookingId, greaterThan(0));
+        System.out.println("Booking criado com ID: " + bookingId + " | Nome: Joao Souza");
     }
 
     @Test
-    public void testAtualizarBooking() {
-        int id = BookingHelper.criarBooking("Cliente", "Original");
-        Response updateResponse = BookingHelper.atualizarBooking(id, token, "Atualizado");
+    void testAtualizarBooking() {
+        int bookingId = BookingHelper.criarBooking("Joao", "Souza");
+        System.out.println("Booking criado para atualização, ID: " + bookingId);
 
-        assertThat(updateResponse.getStatusCode(), equalTo(200));
-        assertThat(updateResponse.jsonPath().getString("lastname"), equalTo("Atualizado"));
-        System.out.println("Booking atualizado!");
+        Response response = BookingHelper.atualizarBooking(bookingId, token, "Maria", "Silva");
+        response.then().statusCode(200);
+
+        assertThat(response.jsonPath().getString("firstname"), equalTo("Maria"));
+        assertThat(response.jsonPath().getString("lastname"), equalTo("Silva"));
+        System.out.println("Booking atualizado: " + bookingId + " | Novo Nome: Maria Silva");
     }
 
     @Test
-    public void testDeletarBooking() {
-        int id = BookingHelper.criarBooking("Cliente", "ParaDeletar");
-        Response deleteResponse = BookingHelper.deletarBooking(id, token);
+    void testDeletarBooking() {
+        int bookingId = BookingHelper.criarBooking("Joao", "Souza");
+        System.out.println("Booking criado para deleção, ID: " + bookingId);
 
-        assertThat(deleteResponse.getStatusCode(), equalTo(201));
-        System.out.println("Booking deletado!");
+        Response response = BookingHelper.deletarBooking(bookingId, token);
+        response.then().statusCode(201);
+
+        System.out.println("Booking deletado: " + bookingId);
     }
 }
